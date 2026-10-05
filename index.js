@@ -400,7 +400,7 @@ async function sendMarket(chatId, coin) {
       chatId,
       `🏦 <b>${coinTitle(coin)} — Markets</b>\n\n${rows.join(
         "\n"
-      )}\n\n<i>Market data powered by CoinPaprika.</i>`
+      )}\n\n<i>🐋 Powered by WhalesCoin.</i>
     );
   } catch (err) {
     console.log("Market error:", err.response?.data || err.message);
