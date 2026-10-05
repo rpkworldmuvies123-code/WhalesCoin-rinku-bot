@@ -1,0 +1,14 @@
+{
+  "name": "whalescoin-v2-professional-bot",
+  "version": "2.0.0",
+  "description": "WhalesCoin professional Telegram crypto market and moderation bot",
+  "main": "index.js",
+  "scripts": {"start":"node index.js"},
+  "engines": {"node":">=20"},
+  "dependencies": {
+    "axios":"^1.7.9",
+    "dotenv":"^16.4.7",
+    "express":"^4.21.2",
+    "node-telegram-bot-api":"^0.66.0"
+  }
+}
