@@ -197,50 +197,67 @@ function isFlooding(chatId, userId) {
 }
 
 // -------------------------
-// CoinGecko helpers
-// -------------------------
-const cg = axios.create({
-  baseURL: "https://api.coingecko.com/api/v3",
-  timeout: 12000,
-  headers: COINGECKO_API_KEY
-    ? { "x-cg-demo-api-key": COINGECKO_API_KEY }
-    : {}
-});
+bot.onText(/^\/price(?:@\w+)?(?:\s+(.+))?$/i, async (msg, match) => {
+  const query = (match?.[1] || "").trim();
 
-async function findCoin(query) {
-  const q = query.trim().toLowerCase();
-  const { data } = await cg.get("/search", { params: { query: q } });
-  if (!data.coins || !data.coins.length) return null;
+  if (!query) {
+    return sendNotice(
+      msg.chat.id,
+      `ℹ️ Use: <code>/price BTC</code>\nExample: <code>/price ETH</code>`
+    );
+  }
 
-  return (
-    data.coins.find(c => c.symbol?.toLowerCase() === q) ||
-    data.coins.find(c => c.id?.toLowerCase() === q) ||
-    data.coins[0]
-  );
-}
+  try {
+    const coin = await findCoin(query);
 
-async function getCoinMarket(coinId) {
-  const { data } = await cg.get("/coins/markets", {
-    params: {
-      vs_currency: "usd",
-      ids: coinId,
-      price_change_percentage: "24h"
+    if (!coin) {
+      return sendNotice(
+        msg.chat.id,
+        `❌ Coin not found: <b>${escapeHtml(query)}</b>`
+      );
     }
-  });
-  return data?.[0] || null;
-}
 
-function fmtMoney(n) {
-  if (n === null || n === undefined || Number.isNaN(Number(n))) return "N/A";
-  const num = Number(n);
-  if (Math.abs(num) >= 1e12) return `$${(num / 1e12).toFixed(2)}T`;
-  if (Math.abs(num) >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
-  if (Math.abs(num) >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
-  if (Math.abs(num) >= 1) return `$${num.toLocaleString("en-US", { maximumFractionDigits: 6 })}`;
-  return `$${num.toLocaleString("en-US", { maximumFractionDigits: 10 })}`;
-}
+    const market = await getCoinMarket(coin.id);
+    const usd = market?.quotes?.USD;
 
-function changeIcon(value) {
+    if (!usd) {
+      return sendNotice(
+        msg.chat.id,
+        `⚠️ Market data is temporarily unavailable.`
+      );
+    }
+
+    const change = Number(usd.percent_change_24h || 0);
+
+    const text =
+`📊 <b>${escapeHtml(market.name)} (${escapeHtml(market.symbol)})</b>
+
+💰 <b>Price:</b> ${fmtMoney(usd.price)}
+
+${changeIcon(change)} <b>24h Change:</b> ${change.toFixed(2)}%
+
+🏦 <b>Market Cap:</b> ${fmtMoney(usd.market_cap)}
+
+📈 <b>24h Volume:</b> ${fmtMoney(usd.volume_24h)}
+
+🏆 <b>Rank:</b> #${market.rank || "N/A"}
+
+<i>Market data powered by CoinPaprika.</i>`;
+
+    await sendNotice(msg.chat.id, text);
+
+  } catch (err) {
+    console.log(
+      "CoinPaprika error:",
+      err.response?.data || err.message
+    );
+
+    await sendNotice(
+      msg.chat.id,
+      `⚠️ Market data could not be loaded right now. Please try again shortly.`
+    );
+  }
+});
   const n = Number(value || 0);
   return n >= 0 ? "🟢" : "🔴";
 }
