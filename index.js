@@ -430,7 +430,7 @@ async function sendVolume(chatId, coin) {
           : "N/A"
       }
 
-<i>Market data powered by CoinPaprika.</i>`
+<i>🐋 Powered by WhalesCoin.</i>
     );
   } catch (err) {
     console.log("Volume error:", err.response?.data || err.message);
@@ -476,7 +476,7 @@ async function sendBio(chatId, coin) {
 
 ${escapeHtml(shortDescription)}
 
-<i>Information powered by CoinPaprika.</i>`
+<i>🐋 Powered by WhalesCoin.</i>
     );
   } catch (err) {
     console.log("Bio error:", err.response?.data || err.message);
@@ -781,7 +781,7 @@ bot.onText(/^\/trending(?:@\w+)?$/i, async msg => {
 
 ${rows.join("\n")}
 
-<i>Market data powered by CoinPaprika.</i>`
+<i>🐋 Powered by WhalesCoin.</i>
     );
   } catch (err) {
     console.log("Trending error:", err.response?.data || err.message);
